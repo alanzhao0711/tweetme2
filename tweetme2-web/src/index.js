@@ -1,16 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { TweetsComponent } from './tweets';
 
-const tweetsEl = ReactDOM.createRoot(document.getElementById('tweetme-2'));
-tweetsEl.render(
+
+const root = ReactDOM.createRoot(document.getElementById('tweetme'));
+root.render(
   <React.StrictMode>
     <TweetsComponent />
   </React.StrictMode>
 );
+
 
 
 // If you want to start measuring performance in your app, pass a function
