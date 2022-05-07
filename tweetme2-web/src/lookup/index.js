@@ -1,5 +1,5 @@
-import { loadTweets } from "./components";
+import { backendlookup } from "./components";
 
 export {
-    loadTweets
+    backendlookup,
 }
