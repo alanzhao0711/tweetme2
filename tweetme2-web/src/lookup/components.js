@@ -33,7 +33,9 @@ export function backendlookup(method, endpoint, callback, data) {
   }
   xhr.onload = function() {
     if (xhr.status === 403) {
-      window.location.href = "/login?showLoinRequired=true"
+      if (window.location.href.indexOf("login") === -1) {
+        window.location.href = "/login?showLoinRequired=true"
+      }
     }
       callback(xhr.response, xhr.status)
   }

@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.pagination import PageNumberPagination
 from ..forms import TweetForm
 from ..models import Tweet
 from ..serializers import TweetSerializer, TweetActionSerializer, TweetCreateSerializer
@@ -79,28 +80,27 @@ def tweet_action_view(request, *args, **kwargs):
             return Response(serializer.data, status=201)
     return Response({}, status=200)
 
+def get_paginated_queryset_response(qs, request):
+    paignator = PageNumberPagination()
+    paignator.page_size = 20
+    paginated_qs = paignator.paginate_queryset(qs, request)
+    serializers = TweetSerializer(paginated_qs, many=True)
+    return paignator.get_paginated_response(serializers.data)
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def tweet_feed_view(request, *args, **kwargs):
     user = request.user
-    profiles = user.following.all()
-    followed_user_id = []
-    if profiles.exists():
-        followed_user_id = [x.user.id for x in profiles]
-    followed_user_id.append(user.id)
-    qs = Tweet.objects.filter(user__id__in=followed_user_id).order_by("-timestamp")
-    serializers = TweetSerializer(qs, many=True)
-    return Response(serializers.data, status=200)
+    qs = Tweet.objects.feed(user)
+    return get_paginated_queryset_response(qs, request)
 
 @api_view(["GET"])
 def tweet_list_view(request, *args, **kwargs):
     qs = Tweet.objects.all()
     username = request.GET.get('username') # ?username=alan
     if username != None:
-        qs = qs.filter(user__username__iexact=username)
-    serializers = TweetSerializer(qs, many=True)
-    return Response(serializers.data, status=200)
+        qs = qs.by_username(username)
+    return get_paginated_queryset_response(qs, request)
 
 def tweet_create_view_pure_django(request, *args, **kwargs):
     user = request.user
